@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="messages">
+                <div class="ui text loader">Loading messages...</div>
+                {% include 'chat/_messages.html' %}
+    </div>
+
+    <textarea name="" id="" cols="30" rows="10" placeholder="write ...." class="message-textarea">
+    </textarea>
+{% endblock %}
+
+{% block script %}
+
+    {{ super() }}
+    var ENTER_KEY = 13;
+    function new_message(e) {
+        var $textarea = $('#message-textarea');
+        var message_body = $textarea.val().trim();
+        if (e.which == ENTER_KEY && !e.shiftKey && message_body){
+            e.preventDefault();
+            socket.emit('new message', message_body);
+            $textarea.val('')
+        }
+    }
+
+
+{% endblock %}

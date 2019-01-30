@@ -8,19 +8,31 @@
 @detail : None
 '''
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_login.login_manager import LoginManager
+from app.bp import chat
+from app.extensions import db, moment, login_manager, socketio, csrf
 
-db = SQLAlchemy()
-login_manager = LoginManager()
+
 
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('../config.py')
-    db.init_app(app)
-    login_manager.init_app(app)
+    _create_db_table(app)
+    _register_extension(app)
+    _register_blueprint(app)
     return app
 
 
+def _register_extension(app):
+    db.init_app(app)
+    moment.init_app(app)
+    csrf.init_app(app)
+    socketio.init_app(app)
 
+def _create_db_table(app):
+    db.init_app(app)
+    with app.app_context():
+        db.create_all(app=app)
 
+def _register_blueprint(app):
+    from app.bp import chat
+    app.register_blueprint(chat)

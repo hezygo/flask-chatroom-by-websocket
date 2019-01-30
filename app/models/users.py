@@ -7,11 +7,12 @@
 @email  : wolflikai@163.com
 @detail : None
 '''
-import datetime
-import hashlib
 
+import hashlib
 from flask_login.mixins import UserMixin
-from app import db, login_manager
+from app.extensions import db
+from werkzeug.security import generate_password_hash, check_password_hash
+from app.models.messages import Message
 
 
 class User(db.Model, UserMixin):
@@ -22,17 +23,30 @@ class User(db.Model, UserMixin):
     github = db.Column(db.String(256))
     website = db.Column(db.String(256))
     bio = db.Column(db.String(256))
-    messages = db.relationship('Message', backref='author', cascade='all')
+    messages = db.relationship('Message', backref='author')
     email_hash = db.Column(db.String(32))
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         self.generate_email_hash()
 
-
     def generate_email_hash(self):
         if self.email and not self.email_hash:
             self.email_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
+
+    @property
+    def password(self):
+        return self.password_hash
+
+    @password.setter
+    def password(self, raw):
+        self.password_hash = generate_password_hash(raw)
+
+    def check_password(self, raw):
+        if not self.password_hash:
+            return False
+        return check_password_hash(self.password_hash, raw)
+
 
     @property
     def gravatar(self):
@@ -40,13 +54,3 @@ class User(db.Model, UserMixin):
 
 
 
-class Model(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.datetime.now, index=True)
-    author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-
-@login_manager.user_loader
-def load_user(userid):
-    return User.get(userid)

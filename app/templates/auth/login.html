@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-Cn">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+    <div class="top">
+
+    </div>
+    <div class="content">
+        <div class="login-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-title"></div>
+            <input type="text" name="username" placeholder="input username">
+            <input type="password" name="passwd">
+            <input type="submit" value="登录">
+        </div>
+    </div>
+    <div class="bot">
+
+    </div>
+</body>
+</html>
